@@ -1,9 +1,10 @@
-#include "mainwindow.h"
+#include "include/mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QDebug>
 #include <QMessageBox>
 #include <QTimer>
 #include <QPushButton>
+
+#include <glog/logging.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,9 +33,12 @@ MainWindow::MainWindow(QWidget *parent) :
     m_appLoader = new AppLoader(this);
     connect(m_appLoader, SIGNAL(appIsRunning()),
             this, SLOT(invalidateLoader()));
+    connect(m_appLoader, SIGNAL(getFocusBack()),
+            this, SLOT(reEnableLoader()));
+
     QStringList apps = m_appLoader->getInstalledApps();
     int napps = m_appLoader->getNrInstalledApps();
-    qDebug() << "Nr. of installed apps: " << napps;
+    DLOG (INFO) << "Nr. of installed apps: " << napps;
 
     // dynamic ui design
     int c = napps;
@@ -111,7 +115,13 @@ void MainWindow::on_pushButton_continue_clicked()
     ui->mainStack->setCurrentIndex(1);
 }
 
+//To disable focus while on background
 void MainWindow::invalidateLoader()
 {
     ui->centralwidget->setEnabled(false);
+}
+
+//To bring focus back
+void MainWindow::reEnableLoader() {
+    ui->centralwidget->setEnabled(true);
 }

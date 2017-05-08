@@ -24,6 +24,7 @@ private slots:
     void on_key_clicked();
     void on_pushButton_continue_clicked();
     void invalidateLoader();
+    void reEnableLoader();
 private:
     Ui::MainWindow *ui;
     QString m_initPin = "1590";

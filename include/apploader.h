@@ -16,11 +16,15 @@ public:
 public:
     QStringList getInstalledApps();
     int getNrInstalledApps();
+private:
+    int appIsRegistered(int pid);
 signals:
     void appIsRunning();
+    void getFocusBack();
 private slots:
     void launchApp();
-    void informPidReceived(int pid, QString app);
+    void registerAppReceivedSlot(int pid, QString app);
+    void unregisterAppReceivedSlot(int pid);
 private:
     QStringList m_installedApps;
     QList<QPair<int,QString>> m_appsAndPids;

@@ -11,11 +11,13 @@ public:
     DBusDaemon(QObject *parent = 0);
 
 signals:
-    void informPidReceived(int pid, QString app);
+    void registerAppReceived(int pid, QString app);
+    void unregisterAppReceived(int pid);
 Q_SIGNALS:
-    void sendShutdownSignal(QString appname);
+    Q_SCRIPTABLE void sendShutdownSignal(QString appname);
 public Q_SLOTS:
-    void informPid(int pid, QString app);
+    void registerApp(int pid, QString app);
+    void unregisterApp(int pid);
 
 public slots:
 };

@@ -23,26 +23,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
-SOURCES += mainwindow.cpp \
-    apploader.cpp \
-    main.cpp \
-    dbusdaemon.cpp
+SOURCES += src/mainwindow.cpp \
+    src/apploader.cpp \
+    src/main.cpp \
+    src/dbusdaemon.cpp
 
-HEADERS  += mainwindow.h \
-    apploader.h \
-    dbusdaemon.h
+HEADERS  += include/mainwindow.h \
+    include/apploader.h \
+    include/dbusdaemon.h
 
 FORMS    += \
-    mainwindow.ui
+    forms/mainwindow.ui
 
 RESOURCES += \
-    resources.qrc
+    res/resources.qrc
 
 DBUS_ADAPTORS += \
-    se.mydns.mysland.DBusDaemon.xml
+    interface/se.mydns.mysland.DBusDaemon.xml
 
 DBUS_INTERFACES += \
-    se.mydns.mysland.DBusDaemon.xml
+    interface/se.mydns.mysland.DBusDaemon.xml
 
 DISTFILES += \
-    se.mydns.mysland.DBusDaemon.xml
+    interface/se.mydns.mysland.DBusDaemon.xml
+
+LIBS += -lglog

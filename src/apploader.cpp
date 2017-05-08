@@ -3,17 +3,19 @@
 #include <unistd.h>
 #include <string>
 #include <string.h>
-#include "apploader.h"
+#include "include/apploader.h"
 #include <QPushButton>
-#include <QDebug>
 #include <QProcess>
+#include <glog/logging.h>
 
 AppLoader::AppLoader(QObject* parent): QObject(parent)
 {
     m_nrInstalledApps = 0;
     m_daemon = new DBusDaemon();
-    connect(m_daemon, SIGNAL(informPidReceived(int,QString)),
-            this, SLOT(informPidReceived(int,QString)));
+    connect(m_daemon, SIGNAL(registerAppReceived(int,QString)),
+            this, SLOT(registerAppReceivedSlot(int,QString)));
+    connect(m_daemon, SIGNAL(unregisterAppReceived(int)),
+            this, SLOT(unregisterAppReceivedSlot(int)));
 }
 
 AppLoader::~AppLoader()
@@ -23,11 +25,11 @@ AppLoader::~AppLoader()
 
 QStringList AppLoader::getInstalledApps()
 {
-    DIR *d, *subd;
+    DIR *d;
     struct dirent *dir;
-    d = opendir(TappPath.toStdString().c_str());
+    d = opendir(appPath.toStdString().c_str());
     if (d) {
-        qDebug() << "Dir opened";
+        LOG (ERROR) << "Dir opened";
         while((dir=readdir(d)) != NULL) {
             if (!QString(dir->d_name).contains("."))
                 m_installedApps << QString(dir->d_name);
@@ -36,7 +38,7 @@ QStringList AppLoader::getInstalledApps()
         m_nrInstalledApps = m_installedApps.size();
         return m_installedApps;
     } else {
-        qDebug() << "Error: Could not open dir";
+        LOG (ERROR) << "Error: Could not open dir";
         return QStringList();
     }
 }
@@ -49,8 +51,8 @@ int AppLoader::getNrInstalledApps()
 void AppLoader::launchApp()
 {
     QString app = qobject_cast<QPushButton*>(QObject::sender())->objectName();
-    QString fullPath = QString(TappPath + "/" + app + "/" + app);
-    qDebug() << "Launching app: " << fullPath;
+    QString fullPath = QString(appPath + "/" + app + "/" + app);
+    DLOG (INFO) << "Launching app: " << fullPath.toStdString();
     /*int e;
     char *execPath = new char[fullPath.size() + 1];
     strcpy(execPath, fullPath.toStdString().c_str());
@@ -68,9 +70,9 @@ void AppLoader::launchApp()
     };
 
     if ((e=execve(argv[0], &argv[0], envp)) != 0) {
-        qDebug() << "Error (return code was: " << e << ")";
+        LOG (ERROR) << "Error (return code was: " << e.toStdString() << ")";
     } else {
-        qDebug() << "App is running!";
+        LOG (ERROR) << "App is running!";
     }*/
     QProcess* p = new QProcess(this);
     p->start(fullPath);
@@ -78,8 +80,31 @@ void AppLoader::launchApp()
     emit appIsRunning();
 }
 
-void AppLoader::informPidReceived(int pid, QString app)
+void AppLoader::registerAppReceivedSlot(int pid, QString app)
 {
-    qDebug() << "Appending pair (pid,app) : (" << pid << "," << app << ")";
+    DLOG (INFO) << "Appending pair (pid,app) : (" << pid
+                << "," << app.toStdString() << ")";
     m_appsAndPids << qMakePair<int,QString>(pid,app);
+}
+
+void AppLoader::unregisterAppReceivedSlot(int pid) {
+    DLOG (INFO) << "Checking if pid exists ...";
+    int index;
+    if ((index=appIsRegistered(pid)) != -1) {
+        DLOG (INFO) << "PID " << pid << " exists. Unregistering";
+        m_appsAndPids.removeAt(index);
+        //and reenable focus on main window
+        emit getFocusBack();
+    } else {
+        LOG (ERROR) << "Error: PID " << pid << " does not exist";
+    }
+}
+
+int AppLoader::appIsRegistered(int pid) {
+    for (unsigned k=0; k<m_appsAndPids.size(); ++k) {
+        if (m_appsAndPids.at(k).first == pid) {
+            return k;
+        }
+    }
+    return -1;
 }
