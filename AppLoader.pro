@@ -41,5 +41,8 @@ RESOURCES += \
 DBUS_ADAPTORS += \
     se.mydns.mysland.DBusDaemon.xml
 
+DBUS_INTERFACES += \
+    se.mydns.mysland.DBusDaemon.xml
+
 DISTFILES += \
     se.mydns.mysland.DBusDaemon.xml
