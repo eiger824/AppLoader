@@ -1,5 +1,10 @@
 <RCC>
     <qresource prefix="/images">
         <file>ok.png</file>
+        <file>background.png</file>
+        <file>demotouch.png</file>
+        <file>fallingblocks.png</file>
+        <file>mouseevents.png</file>
+        <file>qqtest.png</file>
     </qresource>
 </RCC>

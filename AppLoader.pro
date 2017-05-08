@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -23,13 +23,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+SOURCES += mainwindow.cpp \
+    apploader.cpp \
+    main.cpp \
+    dbusdaemon.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    apploader.h \
+    dbusdaemon.h
 
 FORMS    += \
     mainwindow.ui
 
 RESOURCES += \
     resources.qrc
+
+DBUS_ADAPTORS += \
+    se.mydns.mysland.DBusDaemon.xml
+
+DISTFILES += \
+    se.mydns.mysland.DBusDaemon.xml

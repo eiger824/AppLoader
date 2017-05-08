@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QTimer>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -10,11 +11,50 @@ MainWindow::MainWindow(QWidget *parent) :
     m_remaining(3)
 {
     ui->setupUi(this);
+    /*
+     * Connect all buttons to the on_key_clicked() slot
+    */
+    connect(ui->pushButton_0, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_1, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_3, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_4, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_5, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_6, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_7, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_8, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+    connect(ui->pushButton_9, SIGNAL(pressed()), this, SLOT(on_key_clicked()));
+
     ui->pushButton_continue->setVisible(false);
     ui->label_4->setVisible(false);
 
     // check for existing apps
+    m_appLoader = new AppLoader(this);
+    connect(m_appLoader, SIGNAL(appIsRunning()),
+            this, SLOT(invalidateLoader()));
+    QStringList apps = m_appLoader->getInstalledApps();
+    int napps = m_appLoader->getNrInstalledApps();
+    qDebug() << "Nr. of installed apps: " << napps;
 
+    // dynamic ui design
+    int c = napps;
+    for (auto app: apps) {
+        QPushButton *p = new QPushButton();
+        p->setFixedWidth(90);
+        p->setFixedHeight(90);
+        p->setFocusPolicy(Qt::NoFocus);
+        p->setStyleSheet("border-radius: 10px;background-image: url(:/images/" + app + ".png);");
+        //important: object name property
+        p->setObjectName(app);
+        //put it in the grid
+        ui->gridLayout->addWidget(p,
+                                  (int)(napps - c) / 3,
+                                  (napps - c) % 3,
+                                  Qt::AlignHCenter | Qt::AlignVCenter);
+        //connect it to the launcher function
+        connect(p, SIGNAL(pressed()), m_appLoader, SLOT(launchApp()));
+        --c;
+    }
 }
 
 MainWindow::~MainWindow()
@@ -61,57 +101,17 @@ void MainWindow::clearLineEdit() {
     ui->label_2->clear();
 }
 
-void MainWindow::on_pushButton_1_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_1->text());
-}
-
-void MainWindow::on_pushButton_2_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_2->text());
-}
-
-void MainWindow::on_pushButton_3_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_3->text());
-}
-
-void MainWindow::on_pushButton_4_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_4->text());
-}
-
-void MainWindow::on_pushButton_6_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_6->text());
-}
-
-void MainWindow::on_pushButton_5_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_5->text());
-}
-
-void MainWindow::on_pushButton_7_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_7->text());
-}
-
-void MainWindow::on_pushButton_9_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_9->text());
-}
-
-void MainWindow::on_pushButton_8_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_8->text());
-}
-
-void MainWindow::on_pushButton_0_clicked()
-{
-    ui->lineEdit->setText(ui->lineEdit->text() += ui->pushButton_0->text());
+void MainWindow::on_key_clicked() {
+    QString n = qobject_cast<QPushButton*>(QObject::sender())->text();
+    ui->lineEdit->setText(ui->lineEdit->text() += n);
 }
 
 void MainWindow::on_pushButton_continue_clicked()
 {
     ui->mainStack->setCurrentIndex(1);
+}
+
+void MainWindow::invalidateLoader()
+{
+    ui->centralwidget->setEnabled(false);
 }
